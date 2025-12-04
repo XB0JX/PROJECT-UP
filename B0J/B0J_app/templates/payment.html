@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оплата заказа - UP TAXI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; color: #333; }
+        
+        .header { background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
+        .logo { font-size: 2rem; font-weight: 900; color: #4a6ee0; display: flex; align-items: center; gap: 10px; }
+        .logo span { color: #ffd700; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { color: #555; text-decoration: none; font-weight: 600; transition: color 0.3s; padding: 0.5rem 1rem; border-radius: 5px; }
+        .nav-links a:hover { color: #4a6ee0; background: rgba(74, 110, 224, 0.1); }
+        
+        .page-hero { 
+            background: linear-gradient(135deg, #4a6ee0, #6a11cb);
+            color: white;
+            padding: 8rem 0 4rem;
+            margin-top: 60px;
+            text-align: center;
+        }
+        
+        .payment-content { padding: 4rem 0; }
+        .payment-container { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 3rem; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+        }
+        
+        .order-info { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .order-info h2 { color: #4a6ee0; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 3px solid #ffd700; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
+        .info-label { color: #666; }
+        .info-value { font-weight: 600; }
+        .total-price { font-size: 2rem; color: #4a6ee0; font-weight: 800; text-align: center; margin-top: 1rem; }
+        
+        .payment-methods { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .payment-methods h2 { color: #4a6ee0; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 3px solid #ffd700; }
+        .method-option { 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem; 
+            padding: 1rem; 
+            margin-bottom: 1rem; 
+            border: 2px solid #e0e0e0; 
+            border-radius: 10px; 
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .method-option:hover { border-color: #4a6ee0; background: #f8f9ff; }
+        .method-option.selected { border-color: #4a6ee0; background: #eef2ff; }
+        .method-icon { font-size: 2rem; }
+        .method-info h4 { margin-bottom: 0.2rem; }
+        .method-info p { color: #666; font-size: 0.9rem; }
+        
+        .pay-btn { 
+            background: linear-gradient(45deg, #28a745, #20c997); 
+            color: white; 
+            border: none; 
+            padding: 1.2rem 3rem; 
+            font-size: 1.2rem; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            display: block; 
+            margin: 2rem auto 0; 
+            transition: transform 0.3s;
+        }
+        .pay-btn:hover { transform: translateY(-3px); }
+        
+        .footer { background: #1a1a2e; color: white; padding: 4rem 0 2rem; margin-top: 4rem; }
+        .copyright { text-align: center; padding-top: 2rem; border-top: 1px solid #333; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">🚕 UP<span>TAXI</span></div>
+                <ul class="nav-links">
+                    <li><a href="/">Главная</a></li>
+                    <li><a href="/drivers/">Водители</a></li>
+                    <li><a href="/contacts/">Контакты</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="page-hero">
+        <div class="container">
+            <h1>Оплата заказа</h1>
+            <p>Выберите удобный способ оплаты</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="payment-content">
+            {% if order %}
+            <div class="payment-container">
+                <div class="order-info">
+                    <h2>Детали заказа</h2>
+                    <div class="info-row">
+                        <span class="info-label">Номер заказа:</span>
+                        <span class="info-value">#{{ order.id }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Откуда:</span>
+                        <span class="info-value">{{ order.pickup_address }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Куда:</span>
+                        <span class="info-value">{{ order.destination }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Расстояние:</span>
+                        <span class="info-value">{{ order.distance }} км</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Время:</span>
+                        <span class="info-value">{{ order.estimated_time }} мин</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Водитель:</span>
+                        <span class="info-value">
+                            {% if order.driver %}
+                                {{ order.driver.name }} на {{ order.driver.car_model }}
+                            {% else %}
+                                Будет назначен
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Способ оплаты:</span>
+                        <span class="info-value">{{ order.get_payment_method_display }}</span>
+                    </div>
+                    <div class="total-price">
+                        {{ order.price }} ₽
+                    </div>
+                </div>
+                
+                <div class="payment-methods">
+                    <h2>Способы оплаты</h2>
+                    
+                    <form method="POST" action="/process_payment/{{ order.id }}/">
+                        {% csrf_token %}
+                        
+                        <div class="method-option selected" onclick="selectMethod('online_card')">
+                            <div class="method-icon">💻</div>
+                            <div class="method-info">
+                                <h4>Карта онлайн</h4>
+                                <p>Visa, Mastercard, Мир</p>
+                            </div>
+                        </div>
+                        
+                        <div class="method-option" onclick="selectMethod('cash')">
+                            <div class="method-icon">💵</div>
+                            <div class="method-info">
+                                <h4>Наличные</h4>
+                                <p>Оплата водителю наличными</p>
+                            </div>
+                        </div>
+                        
+                        <div class="method-option" onclick="selectMethod('card')">
+                            <div class="method-icon">💳</div>
+                            <div class="method-info">
+                                <h4>Карта водителю</h4>
+                                <p>Оплата картой в такси</p>
+                            </div>
+                        </div>
+                        
+                        <div class="method-option" onclick="selectMethod('apple_pay')">
+                            <div class="method-icon">📱</div>
+                            <div class="method-info">
+                                <h4>Apple Pay</h4>
+                                <p>Быстрая оплата с iPhone</p>
+                            </div>
+                        </div>
+                        
+                        <div class="method-option" onclick="selectMethod('google_pay')">
+                            <div class="method-icon">📱</div>
+                            <div class="method-info">
+                                <h4>Google Pay</h4>
+                                <p>Оплата через Google Pay</p>
+                            </div>
+                        </div>
+                        
+                        <div class="method-option" onclick="selectMethod('yandex_money')">
+                            <div class="method-icon">💰</div>
+                            <div class="method-info">
+                                <h4>Яндекс.Деньги</h4>
+                                <p>Оплата через ЮMoney</p>
+                            </div>
+                        </div>
+                        
+                        <div class="method-option" onclick="selectMethod('sberbank')">
+                            <div class="method-icon">🏦</div>
+                            <div class="method-info">
+                                <h4>Сбербанк Онлайн</h4>
+                                <p>Оплата через Сбербанк</p>
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" id="payment_method" name="payment_method" value="online_card">
+                        
+                        <button type="submit" class="pay-btn">Оплатить {{ order.price }} ₽</button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 4rem;">
+                <h2>Заказ не найден</h2>
+                <p>Вернитесь на главную страницу для оформления нового заказа.</p>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="copyright">
+                <p>© 2024 UP TAXI. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function selectMethod(method) {
+            // Снимаем выделение со всех методов
+            document.querySelectorAll('.method-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Выделяем выбранный метод
+            event.currentTarget.classList.add('selected');
+            
+            // Устанавливаем значение в скрытом поле
+            document.getElementById('payment_method').value = method;
+        }
+    </script>
+</body>
+</html>

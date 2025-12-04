@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Наши водители - UP TAXI</title>
+    <style>
+        /* Используем стили из about.html */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; color: #333; }
+        .header { background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
+        .logo { font-size: 2rem; font-weight: 900; color: #4a6ee0; display: flex; align-items: center; gap: 10px; }
+        .logo span { color: #ffd700; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { color: #555; text-decoration: none; font-weight: 600; transition: color 0.3s; padding: 0.5rem 1rem; border-radius: 5px; }
+        .nav-links a:hover, .nav-links a.active { color: #4a6ee0; background: rgba(74, 110, 224, 0.1); }
+        
+        .page-hero { 
+            background: linear-gradient(135deg, #4a6ee0, #6a11cb);
+            color: white;
+            padding: 8rem 0 4rem;
+            margin-top: 60px;
+            text-align: center;
+        }
+        
+        .drivers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; padding: 4rem 0; }
+        .driver-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .driver-header { background: #4a6ee0; color: white; padding: 2rem; text-align: center; }
+        .driver-avatar { font-size: 3rem; margin-bottom: 1rem; }
+        .driver-body { padding: 1.5rem; }
+        .driver-info { display: flex; justify-content: space-between; margin-bottom: 0.8rem; }
+        
+        .footer { background: #1a1a2e; color: white; padding: 4rem 0 2rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">🚕 UP<span>TAXI</span></div>
+                <ul class="nav-links">
+                    <li><a href="/">Главная</a></li>
+                    <li><a href="/drivers/" class="active">Водители</a></li>
+                    <li><a href="/about/">О нас</a></li>
+                    <li><a href="/contacts/">Контакты</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="page-hero">
+        <div class="container">
+            <h1>Наши водители</h1>
+            <p>Профессиональные водители с большим опытом работы</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="drivers-grid">
+            {% for driver in drivers %}
+            <div class="driver-card">
+                <div class="driver-header">
+                    <div class="driver-avatar">{{ driver.photo|default:"👨‍✈️" }}</div>
+                    <h3>{{ driver.name }}</h3>
+                    <p>{{ driver.experience }} лет опыта</p>
+                </div>
+                <div class="driver-body">
+                    <div class="driver-info">
+                        <span>Автомобиль:</span>
+                        <strong>{{ driver.car_model }}</strong>
+                    </div>
+                    <div class="driver-info">
+                        <span>Номер:</span>
+                        <strong>{{ driver.car_number }}</strong>
+                    </div>
+                    <div class="driver-info">
+                        <span>Телефон:</span>
+                        <strong>{{ driver.phone }}</strong>
+                    </div>
+                    <div class="driver-info">
+                        <span>Рейтинг:</span>
+                        <strong style="color: #ffd700;">{{ driver.rating }} ★</strong>
+                    </div>
+                    <div class="driver-info">
+                        <span>Статус:</span>
+                        {% if driver.is_available %}
+                            <strong style="color: #28a745;">● Свободен</strong>
+                        {% else %}
+                            <strong style="color: #dc3545;">● Занят</strong>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div style="text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem;">UP<span style="color: #ffd700;">TAXI</span></div>
+                <p>© 2025 UP TAXI. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

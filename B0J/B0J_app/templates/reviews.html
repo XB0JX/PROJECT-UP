@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отзывы клиентов - UP TAXI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; color: #333; }
+        
+        .header { background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
+        .logo { font-size: 2rem; font-weight: 900; color: #4a6ee0; display: flex; align-items: center; gap: 10px; }
+        .logo span { color: #ffd700; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { color: #555; text-decoration: none; font-weight: 600; transition: color 0.3s; padding: 0.5rem 1rem; border-radius: 5px; }
+        .nav-links a:hover, .nav-links a.active { color: #4a6ee0; background: rgba(74, 110, 224, 0.1); }
+        
+        .page-hero { 
+            background: linear-gradient(135deg, #4a6ee0, #6a11cb);
+            color: white;
+            padding: 8rem 0 4rem;
+            margin-top: 60px;
+            text-align: center;
+        }
+        
+        .reviews-content { padding: 4rem 0; }
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 2rem; 
+            margin-bottom: 3rem; 
+        }
+        .stat-card { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            text-align: center; 
+        }
+        .stat-number { font-size: 2.5rem; font-weight: 800; color: #4a6ee0; display: block; }
+        .stat-label { color: #666; }
+        
+        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2rem; }
+        .review-card { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+        }
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .reviewer-name { font-weight: 700; color: #333; }
+        .review-date { color: #999; font-size: 0.9rem; }
+        .review-rating { color: #ffd700; font-size: 1.2rem; }
+        .review-driver { color: #4a6ee0; font-weight: 600; margin-top: 0.5rem; }
+        .review-text { line-height: 1.6; margin-top: 1rem; }
+        
+        .add-review-btn { 
+            background: #4a6ee0; 
+            color: white; 
+            border: none; 
+            padding: 1rem 2rem; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            display: block; 
+            margin: 3rem auto; 
+            text-decoration: none;
+            text-align: center;
+            width: 200px;
+        }
+        
+        .footer { background: #1a1a2e; color: white; padding: 4rem 0 2rem; margin-top: 4rem; }
+        .copyright { text-align: center; padding-top: 2rem; border-top: 1px solid #333; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">🚕 UP<span>TAXI</span></div>
+                <ul class="nav-links">
+                    <li><a href="/">Главная</a></li>
+                    <li><a href="/drivers/">Водители</a></li>
+                    <li><a href="/contacts/">Контакты</a></li>
+                    <li><a href="/reviews/" class="active">Отзывы</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="page-hero">
+        <div class="container">
+            <h1>Отзывы наших клиентов</h1>
+            <p>Узнайте, что говорят о нас пассажиры</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="reviews-content">
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number">4.8</span>
+                    <span class="stat-label">Средний рейтинг</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">1,247</span>
+                    <span class="stat-label">Отзывов</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">98%</span>
+                    <span class="stat-label">Положительных</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">24/7</span>
+                    <span class="stat-label">Поддержка</span>
+                </div>
+            </div>
+            
+            <a href="/" class="add-review-btn">Оставить отзыв</a>
+            
+            <div class="reviews-grid">
+                {% for review in reviews %}
+                <div class="review-card">
+                    <div class="review-header">
+                        <div>
+                            <div class="reviewer-name">
+                                {% if review.customer and review.customer.user %}
+                                    {{ review.customer.user.username }}
+                                {% else %}
+                                    Анонимный клиент
+                                {% endif %}
+                            </div>
+                            <div class="review-date">{{ review.created_at|date:"d.m.Y" }}</div>
+                        </div>
+                        <div class="review-rating">
+                            {% if review.rating == 1 %}★☆☆☆☆
+                            {% elif review.rating == 2 %}★★☆☆☆
+                            {% elif review.rating == 3 %}★★★☆☆
+                            {% elif review.rating == 4 %}★★★★☆
+                            {% else %}★★★★★
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="review-driver">
+                        Водитель: {{ review.driver.name }}
+                    </div>
+                    <div class="review-text">
+                        {{ review.comment }}
+                    </div>
+                </div>
+                {% empty %}
+                <div style="text-align: center; grid-column: 1/-1; padding: 3rem;">
+                    <div style="font-size: 4rem;">⭐</div>
+                    <h3>Пока нет отзывов</h3>
+                    <p>Будьте первым, кто оставит отзыв!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="copyright">
+                <p>© 2024 UP TAXI. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
