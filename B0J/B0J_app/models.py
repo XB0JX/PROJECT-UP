@@ -1,130 +1,99 @@
 from django.db import models
-from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator, MaxValueValidator
+
+class Tariff(models.Model):
+    """Модель тарифа такси"""
+    TARIFF_TYPES = [
+        ('economy', '🚗 Эконом'),
+        ('comfort', '🚙 Комфорт'),
+        ('business', '🏎️ Бизнес'),
+        ('premium', '⭐ Премиум'),
+        ('cargo', '🚚 Грузовой'),
+        ('family', '👨‍👩‍👧‍👦 С детьми'),
+    ]
+    
+    name = models.CharField(max_length=20, choices=TARIFF_TYPES, verbose_name="Тип тарифа")
+    base_price = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Базовая цена (₽)")
+    price_per_km = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Цена за км (₽)")
+    price_per_minute = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Цена за минуту (₽)")
+    description = models.TextField(verbose_name="Описание", blank=True)
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+    icon = models.CharField(max_length=10, default="🚗", verbose_name="Иконка")
+    
+    def __str__(self):
+        return f"{self.get_name_display()} - {self.base_price}₽"
+    
+    def get_features(self):
+        """Возвращает список преимуществ тарифов"""
+        features = {
+            'economy': ["Недорого", "Быстро", "Базовые условия"],
+            'comfort': ["Комфорт", "Чистый салон", "Водитель с опытом"],
+            'business': ["VIP-обслуживание", "Премиум автомобиль", "Вода в салоне"],
+            'premium': ["Лучшие автомобили", "Личный водитель", "Максимальный комфорт"],
+            'cargo': ["Перевозка грузов", "Просторный багажник", "Помощь с погрузкой"],
+            'family': ["Детское кресло", "Безопасная езда", "Игрушки для детей"],
+        }
+        return features.get(self.name, ["Стандартные условия"])
+    
+    def get_extra_info(self):
+        """Дополнительная информация для тарифов"""
+        info = {
+            'cargo': "Автомобили с большим багажником или микроавтобусы",
+            'family': "Автомобили оборудованные детскими креслами",
+            'economy': "Бюджетный вариант для коротких поездок",
+            'comfort': "Идеально для деловых встреч",
+            'business': "Для важных переговоров и встреч",
+            'premium': "Максимум комфорта и приватности",
+        }
+        return info.get(self.name, "")
+    
+    class Meta:
+        verbose_name = "Тариф"
+        verbose_name_plural = "Тарифы"
+        ordering = ['base_price']
 
 class Driver(models.Model):
     """Модель водителя такси"""
+    STATUS_CHOICES = [
+        ('available', '🟢 Свободен'),
+        ('busy', '🔴 Занят'),
+        ('offline', '⚫ Не в сети'),
+    ]
+    
     name = models.CharField(max_length=100, verbose_name="Имя водителя")
     car_model = models.CharField(max_length=50, verbose_name="Модель автомобиля")
-    car_number = models.CharField(max_length=15, verbose_name="Номер автомобиля")
+    car_number = models.CharField(max_length=15, verbose_name="Номер авто")
     phone = models.CharField(max_length=20, verbose_name="Телефон")
     rating = models.FloatField(default=5.0, verbose_name="Рейтинг")
     experience = models.IntegerField(default=1, verbose_name="Стаж (лет)")
-    is_available = models.BooleanField(default=True, verbose_name="Доступен")
-    photo = models.CharField(max_length=200, default="🚗", verbose_name="Фото (эмодзи)")
+    
+    has_child_seat = models.BooleanField(default=False, verbose_name="Есть детское кресло")
+    has_cargo_space = models.BooleanField(default=False, verbose_name="Большой багажник")
+    max_passengers = models.IntegerField(default=4, verbose_name="Макс. пассажиров")
+    
+    available_tariffs = models.ManyToManyField(Tariff, verbose_name="Доступные тарифы", blank=True)
+    
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='available',
+        verbose_name="Статус"
+    )
     
     def __str__(self):
-        return f"{self.name} - {self.car_model} ({self.car_number})"
+        return f"{self.name} - {self.car_model}"
+    
+    def get_special_features(self):
+        """Возвращает специальные возможности водителя"""
+        features = []
+        if self.has_child_seat:
+            features.append("👶 Детское кресло")
+        if self.has_cargo_space:
+            features.append("📦 Большой багажник")
+        if self.max_passengers > 4:
+            features.append(f"👥 До {self.max_passengers} пассажиров")
+        return features
     
     class Meta:
         verbose_name = "Водитель"
         verbose_name_plural = "Водители"
-
-class Customer(models.Model):
-    """Модель клиента"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Пользователь")
-    phone = models.CharField(max_length=20, verbose_name="Телефон", unique=True)
-    registration_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата регистрации")
-    total_orders = models.IntegerField(default=0, verbose_name="Всего заказов")
-    total_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Всего потрачено")
-    
-    def __str__(self):
-        return f"{self.user.username if self.user else 'Гость'} - {self.phone}"
-    
-    class Meta:
-        verbose_name = "Клиент"
-        verbose_name_plural = "Клиенты"
-
-class Order(models.Model):
-    """Модель заказа такси"""
-    STATUS_CHOICES = [
-        ('pending', 'В ожидании'),
-        ('accepted', 'Принят'),
-        ('in_progress', 'В процессе'),
-        ('completed', 'Завершен'),
-        ('cancelled', 'Отменен'),
-    ]
-    
-    PAYMENT_METHODS = [
-        ('cash', '💵 Наличные'),
-        ('card', '💳 Карта водителю'),
-        ('online_card', '💻 Карта онлайн'),
-        ('apple_pay', '📱 Apple Pay'),
-        ('google_pay', '📱 Google Pay'),
-        ('yandex_money', '💰 Яндекс.Деньги'),
-        ('sberbank', '🏦 Сбербанк Онлайн'),
-        ('qiwi', '🥝 QIWI'),
-        ('corporate', '🏢 Корпоративный счет'),
-    ]
-    
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, verbose_name="Клиент", null=True, blank=True)
-    customer_name = models.CharField(max_length=100, verbose_name="Имя клиента")
-    customer_phone = models.CharField(max_length=20, verbose_name="Телефон клиента")
-    pickup_address = models.TextField(verbose_name="Адрес подачи")
-    destination = models.TextField(verbose_name="Адрес назначения")
-    order_time = models.DateTimeField(auto_now_add=True, verbose_name="Время заказа")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="Статус")
-    driver = models.ForeignKey(Driver, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Водитель")
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='cash', verbose_name="Способ оплаты")
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Стоимость")
-    distance = models.DecimalField(max_digits=6, decimal_places=2, default=0, verbose_name="Расстояние (км)")
-    estimated_time = models.IntegerField(default=0, verbose_name="Примерное время (мин)")
-    
-    def __str__(self):
-        return f"Заказ #{self.id} - {self.customer_name}"
-    
-    class Meta:
-        verbose_name = "Заказ"
-        verbose_name_plural = "Заказы"
-        ordering = ['-order_time']
-
-class Payment(models.Model):
-    """Модель платежа"""
-    STATUS_CHOICES = [
-        ('pending', 'Ожидает оплаты'),
-        ('processing', 'В обработке'),
-        ('completed', 'Оплачено'),
-        ('failed', 'Не удалось'),
-        ('refunded', 'Возврат'),
-    ]
-    
-    order = models.OneToOneField(Order, on_delete=models.CASCADE, verbose_name="Заказ")
-    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Сумма")
-    payment_method = models.CharField(max_length=20, choices=Order.PAYMENT_METHODS, verbose_name="Способ оплаты")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="Статус")
-    transaction_id = models.CharField(max_length=100, blank=True, null=True, verbose_name="ID транзакции")
-    payment_time = models.DateTimeField(auto_now_add=True, verbose_name="Время платежа")
-    notes = models.TextField(blank=True, verbose_name="Примечания")
-    
-    def __str__(self):
-        return f"Платеж #{self.id} - {self.amount} руб."
-    
-    class Meta:
-        verbose_name = "Платеж"
-        verbose_name_plural = "Платежи"
-
-class Review(models.Model):
-    """Модель отзыва"""
-    RATING_CHOICES = [
-        (1, '★☆☆☆☆'),
-        (2, '★★☆☆☆'),
-        (3, '★★★☆☆'),
-        (4, '★★★★☆'),
-        (5, '★★★★★'),
-    ]
-    
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, verbose_name="Клиент", null=True, blank=True)
-    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, verbose_name="Водитель")
-    order = models.OneToOneField(Order, on_delete=models.CASCADE, verbose_name="Заказ")
-    rating = models.IntegerField(choices=RATING_CHOICES, default=5, verbose_name="Рейтинг")
-    comment = models.TextField(verbose_name="Комментарий")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата отзыва")
-    is_approved = models.BooleanField(default=True, verbose_name="Одобрен")
-    
-    def __str__(self):
-        return f"Отзыв от {self.customer.user.username if self.customer and self.customer.user else 'Гость'}"
-    
-    class Meta:
-        verbose_name = "Отзыв"
-        verbose_name_plural = "Отзывы"
-        ordering = ['-created_at']
+        ordering = ['-rating']

@@ -1,39 +1,28 @@
 from django.contrib import admin
-from .models import Driver, Customer, Order, Payment, Review
+from .models import Driver, Tariff
+
+@admin.register(Tariff)
+class TariffAdmin(admin.ModelAdmin):
+    list_display = ['name', 'icon', 'base_price', 'price_per_km', 'price_per_minute', 'is_active']
+    list_filter = ['name', 'is_active']
+    list_editable = ['is_active', 'base_price', 'price_per_km']
 
 @admin.register(Driver)
 class DriverAdmin(admin.ModelAdmin):
-    list_display = ('name', 'car_model', 'car_number', 'phone', 'rating', 'is_available')
-    list_filter = ('is_available',)
-    search_fields = ('name', 'car_model', 'car_number', 'phone')
-    list_editable = ('is_available',)
-
-@admin.register(Customer)
-class CustomerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'phone', 'registration_date', 'total_orders', 'total_spent')
-    search_fields = ('user__username', 'phone')
-    readonly_fields = ('registration_date',)
-
-@admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'customer_name', 'customer_phone', 'driver', 'status', 'payment_method', 'price', 'order_time')
-    list_filter = ('status', 'payment_method')
-    search_fields = ('customer_name', 'customer_phone', 'pickup_address', 'destination')
-    readonly_fields = ('order_time',)
-    list_editable = ('status',)
-
-@admin.register(Payment)
-class PaymentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'order', 'amount', 'payment_method', 'status', 'payment_time')
-    list_filter = ('status', 'payment_method')
-    search_fields = ('transaction_id', 'order__id')
-    readonly_fields = ('payment_time',)
-    list_editable = ('status',)
-
-@admin.register(Review)
-class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('customer', 'driver', 'rating', 'created_at', 'is_approved')
-    list_filter = ('rating', 'is_approved')
-    search_fields = ('comment', 'customer__user__username')
-    list_editable = ('is_approved',)
-    readonly_fields = ('created_at',)
+    list_display = ['name', 'car_model', 'car_number', 'status', 'rating', 'has_child_seat', 'has_cargo_space']
+    list_filter = ['status', 'has_child_seat', 'has_cargo_space', 'available_tariffs']
+    list_editable = ['status', 'has_child_seat', 'has_cargo_space']
+    filter_horizontal = ['available_tariffs']
+    search_fields = ['name', 'car_model', 'car_number']
+    
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('name', 'car_model', 'car_number', 'phone', 'rating', 'experience')
+        }),
+        ('Специальные возможности', {
+            'fields': ('has_child_seat', 'has_cargo_space', 'max_passengers')
+        }),
+        ('Тарифы и статус', {
+            'fields': ('available_tariffs', 'status')
+        }),
+    )
