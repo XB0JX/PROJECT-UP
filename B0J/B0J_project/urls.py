@@ -18,6 +18,7 @@ Including another URLconf
 """
 URL configuration for B0J_project project.
 """
+# B0J_project/urls.py
 from django.contrib import admin
 from django.urls import path, include
 

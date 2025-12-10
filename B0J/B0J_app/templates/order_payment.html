@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Заказ такси - UP TAXI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* Хедер */
+        .header { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 40px; 
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .logo { 
+            font-size: 2.5rem; 
+            font-weight: 900; 
+            color: #4a6ee0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .logo span { color: #ff6b6b; }
+        .nav { 
+            display: flex; 
+            justify-content: center; 
+            gap: 15px; 
+            margin-top: 25px;
+        }
+        .nav a { 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            color: #4a6ee0; 
+            font-weight: 600; 
+            border-radius: 50px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .nav a:hover { border-color: #4a6ee0; transform: translateY(-2px); }
+        .nav a.active { background: #4a6ee0; color: white; }
+        .nav a.back { background: #6c757d; color: white; }
+        .nav a.back:hover { background: #5a6268; }
+        
+        /* Основной контент с двумя колонками */
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        /* Левая колонка - форма заказа */
+        .order-section { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 40px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        /* Правая колонка - способы оплаты */
+        .payment-section { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            align-self: start;
+        }
+        
+        .section-title { 
+            font-size: 1.8rem; 
+            color: #333; 
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 4px;
+            background: #4a6ee0;
+            border-radius: 2px;
+        }
+        
+        .payment-section .section-title { font-size: 1.5rem; }
+        
+        /* Форма */
+        .form-group { margin-bottom: 25px; }
+        .form-label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            color: #444;
+            font-size: 1.1rem;
+        }
+        .form-control { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 2px solid #e0e0e0; 
+            border-radius: 10px; 
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .form-control:focus { 
+            border-color: #4a6ee0; 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(74, 110, 224, 0.1);
+        }
+        
+        /* Тарифы */
+        .tariffs-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+            gap: 15px; 
+            margin-top: 10px;
+        }
+        .tariff-option { 
+            border: 2px solid #e0e0e0; 
+            border-radius: 10px; 
+            padding: 15px; 
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tariff-option:hover { border-color: #4a6ee0; background: #f8f9ff; }
+        .tariff-option.selected { 
+            border-color: #4a6ee0; 
+            background: #e7f1ff;
+            transform: scale(1.02);
+        }
+        .tariff-header { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 10px;
+        }
+        .tariff-icon { 
+            font-size: 1.8rem; 
+            margin-right: 12px;
+        }
+        .tariff-name { 
+            font-weight: 600; 
+            font-size: 1.1rem;
+        }
+        .tariff-price { 
+            color: #4a6ee0; 
+            font-weight: 700; 
+            font-size: 1.3rem;
+            margin: 10px 0;
+        }
+        .tariff-details { 
+            color: #666; 
+            font-size: 0.9rem; 
+            margin-top: 5px;
+        }
+        .tariff-features {
+            margin-top: 10px;
+            padding-left: 20px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .tariff-features li {
+            margin-bottom: 5px;
+        }
+        
+        /* Способы оплаты */
+        .payments-grid { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 12px; 
+            margin-top: 10px;
+        }
+        .payment-option { 
+            border: 2px solid #e0e0e0; 
+            border-radius: 10px; 
+            padding: 15px; 
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        .payment-option:hover { border-color: #4a6ee0; }
+        .payment-option.selected { 
+            border-color: #4a6ee0; 
+            background: #e7f1ff;
+        }
+        .payment-icon { 
+            font-size: 2rem; 
+            margin-right: 15px;
+            width: 40px;
+            text-align: center;
+        }
+        .payment-info { flex: 1; }
+        .payment-name { 
+            font-weight: 600; 
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        .payment-desc { 
+            color: #666; 
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .payment-comission {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        .comission-zero { background: #d4edda; color: #155724; }
+        .comission-positive { background: #f8d7da; color: #721c24; }
+        
+        /* Кнопка отправки */
+        .btn-submit { 
+            width: 100%; 
+            padding: 16px; 
+            background: linear-gradient(135deg, #4a6ee0 0%, #764ba2 100%); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-submit:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(74, 110, 224, 0.3);
+        }
+        
+        /* Сводка заказа */
+        .order-summary {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 2px solid #eef2ff;
+        }
+        .summary-title {
+            font-size: 1.3rem;
+            color: #4a6ee0;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .summary-item {
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .summary-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .summary-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        .total-price {
+            background: #4a6ee0;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .price-label {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+        .price-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        /* Детали способов оплаты */
+        .payment-details {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 15px;
+        }
+        .payment-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px 0;
+            border-bottom: 1px dashed #c3d9ff;
+        }
+        .detail-label { color: #666; }
+        .detail-value { font-weight: 600; color: #333; }
+        
+        /* Сообщения */
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        .message.success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .message.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        /* Футер */
+        .footer { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 30px; 
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            margin-top: 40px;
+        }
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #4a6ee0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .header, .order-section, .payment-section { padding: 25px; }
+            .tariffs-grid { grid-template-columns: 1fr; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .nav { flex-direction: column; }
+            .nav a { width: 100%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo"><span>🚖</span><div>Заказ <span>такси</span></div></div>
+            <p style="color: #666; font-size: 1.1rem; margin-bottom: 10px;">Оформите заказ такси онлайн за 2 минуты</p>
+            <p style="color: #888;">Выберите тариф, способ оплаты и получите расчет стоимости</p>
+            <div class="nav">
+                <a href="/" class="back">← На главную</a>
+                <a href="/drivers/">👨‍✈️ Водители</a>
+                <a href="#order-form" class="active">🚖 Заказать</a>
+            </div>
+        </header>
+
+        <!-- Сообщения Django -->
+        {% if messages %}
+            {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="main-content">
+            <!-- Левая колонка - Форма заказа -->
+            <section class="order-section" id="order-form">
+                <h2 class="section-title">Оформление заказа</h2>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label class="form-label">👤 Ваше имя</label>
+                        <input type="text" name="customer_name" class="form-control" 
+                               placeholder="Иван Иванов" required 
+                               oninput="updateSummary()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">📱 Ваш телефон</label>
+                        <input type="tel" name="customer_phone" class="form-control" 
+                               placeholder="+7 (999) 123-45-67" required 
+                               oninput="updateSummary()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">📍 Откуда забрать?</label>
+                        <input type="text" name="pickup_address" class="form-control" 
+                               placeholder="Улица, дом, подъезд" required 
+                               oninput="updateSummary()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">🎯 Куда едем?</label>
+                        <input type="text" name="destination_address" class="form-control" 
+                               placeholder="Укажите адрес назначения" required 
+                               oninput="updateSummary()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">📏 Примерное расстояние (км)</label>
+                        <input type="number" name="distance" class="form-control" 
+                               placeholder="10" min="1" max="100" step="0.1" required 
+                               oninput="updateSummary(); calculatePrice()">
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            Укажите расстояние для расчета стоимости
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">🚗 Выберите тариф</label>
+                        <div class="tariffs-grid">
+                            {% for tariff in tariffs %}
+                            <label class="tariff-option" onclick="selectTariff(this, {{ tariff.id }})">
+                                <input type="radio" name="tariff" value="{{ tariff.id }}" 
+                                       class="radio-input" {% if forloop.first %}checked{% endif %}>
+                                <div class="tariff-header">
+                                    <div class="tariff-icon">{{ tariff.icon }}</div>
+                                    <div>
+                                        <div class="tariff-name">{{ tariff.get_name_display }}</div>
+                                        <div class="tariff-price">{{ tariff.base_price }}₽</div>
+                                    </div>
+                                </div>
+                                <div class="tariff-details">
+                                    {{ tariff.price_per_km }}₽/км • {{ tariff.price_per_minute }}₽/мин
+                                </div>
+                                <ul class="tariff-features">
+                                    {% for feature in tariff.get_features|slice:":3" %}
+                                    <li>{{ feature }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </label>
+                            {% empty %}
+                            <div style="grid-column: 1/-1; text-align: center; padding: 20px;">
+                                <p>Тарифы пока не добавлены</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="order-summary">
+                        <h3 class="summary-title">📝 Сводка заказа</h3>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <span class="summary-label">Имя:</span>
+                                <span class="summary-value" id="summary-name">—</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Телефон:</span>
+                                <span class="summary-value" id="summary-phone">—</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Откуда:</span>
+                                <span class="summary-value" id="summary-from">—</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Куда:</span>
+                                <span class="summary-value" id="summary-to">—</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Тариф:</span>
+                                <span class="summary-value" id="summary-tariff">—</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Оплата:</span>
+                                <span class="summary-value" id="summary-payment">—</span>
+                            </div>
+                        </div>
+                        
+                        <div class="total-price">
+                            <div class="price-label">Примерная стоимость:</div>
+                            <div class="price-value" id="total-price">0 ₽</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 5px;">
+                                <span id="distance-info">0 км</span> • <span id="time-info">0 мин</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit">
+                        <span style="font-size: 1.5rem;">🚖</span>
+                        Заказать такси
+                    </button>
+                </form>
+            </section>
+            
+            <!-- Правая колонка - Способы оплаты -->
+            <section class="payment-section">
+                <h2 class="section-title">💳 Способы оплаты</h2>
+                
+                <div class="payments-grid">
+                    {% for method in payment_methods %}
+                    <label class="payment-option" onclick="selectPayment(this, {{ method.id }})">
+                        <input type="radio" name="payment_method" value="{{ method.id }}" 
+                               class="radio-input" {% if forloop.first %}checked{% endif %}>
+                        <div class="payment-icon">{{ method.icon }}</div>
+                        <div class="payment-info">
+                            <div class="payment-name">{{ method.get_name_display }}</div>
+                            <div class="payment-desc">{{ method.description }}</div>
+                            {% if method.commission == 0 %}
+                            <span class="payment-comission comission-zero">Без комиссии</span>
+                            {% else %}
+                            <span class="payment-comission comission-positive">Комиссия {{ method.commission }}%</span>
+                            {% endif %}
+                        </div>
+                    </label>
+                    {% empty %}
+                    <div style="text-align: center; padding: 20px; color: #666;">
+                        <p>Способы оплаты не настроены</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="payment-details">
+                    <h3 style="color: #4a6ee0; margin-bottom: 15px; font-size: 1.2rem;">📋 Детали оплаты</h3>
+                    {% for method in payment_methods %}
+                    <div class="payment-detail">
+                        <span class="detail-label">{{ method.get_name_display }}:</span>
+                        <span class="detail-value">
+                            {% if method.commission == 0 %}Без комиссии
+                            {% else %}+{{ method.commission }}%{% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div style="margin-top: 25px; padding: 15px; background: #e7f3ff; border-radius: 10px;">
+                    <h4 style="color: #4a6ee0; margin-bottom: 10px;">ℹ️ Информация</h4>
+                    <ul style="color: #666; font-size: 0.9rem; padding-left: 20px;">
+                        <li>Все платежи защищены</li>
+                        <li>Возврат в течение 24 часов</li>
+                        <li>Поддержка 24/7</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-logo">
+                <span>🚕</span>
+                <div>UP<span>TAXI</span></div>
+            </div>
+            <p style="color: #666; margin: 10px 0;">Быстрое и безопасное такси</p>
+            <p style="color: #888; font-size: 0.9rem;">📞 +7 (999) 123-45-67 | ⏰ 24/7</p>
+            <div style="margin-top: 20px; color: #666; font-size: 0.9rem;">
+                © 2025 UP TAXI. Все платежи защищены.
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Текущие данные для расчета
+        let currentTariff = null;
+        let currentDistance = 0;
+        
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            // Выделяем первый тариф и способ оплаты
+            const firstTariff = document.querySelector('.tariff-option');
+            const firstPayment = document.querySelector('.payment-option');
+            if (firstTariff) {
+                firstTariff.classList.add('selected');
+                currentTariff = {
+                    base_price: parseFloat('{{ tariffs.first.base_price|default:"0" }}'),
+                    price_per_km: parseFloat('{{ tariffs.first.price_per_km|default:"0" }}'),
+                    price_per_minute: parseFloat('{{ tariffs.first.price_per_minute|default:"0" }}'),
+                    name: '{{ tariffs.first.get_name_display|default:"" }}'
+                };
+            }
+            if (firstPayment) firstPayment.classList.add('selected');
+            
+            // Устанавливаем начальные значения
+            updateSummary();
+            calculatePrice();
+        });
+        
+        function selectTariff(element, tariffId) {
+            // Снимаем выделение со всех тарифов
+            document.querySelectorAll('.tariff-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            // Выделяем выбранный
+            element.classList.add('selected');
+            // Устанавливаем radio кнопку
+            element.querySelector('input[type="radio"]').checked = true;
+            
+            // Получаем данные тарифа для расчета
+            const tariffName = element.querySelector('.tariff-name').textContent;
+            const tariffPrice = element.querySelector('.tariff-price').textContent;
+            const tariffDetails = element.querySelector('.tariff-details').textContent;
+            
+            // Извлекаем цены из текста
+            const prices = tariffDetails.match(/(\d+(\.\d+)?)/g) || [0, 0];
+            
+            currentTariff = {
+                name: tariffName,
+                base_price: parseFloat(tariffPrice),
+                price_per_km: parseFloat(prices[0] || 0),
+                price_per_minute: parseFloat(prices[1] || 0)
+            };
+            
+            // Обновляем сводку
+            document.getElementById('summary-tariff').textContent = tariffName;
+            calculatePrice();
+        }
+        
+        function selectPayment(element, paymentId) {
+            // Снимаем выделение со всех способов оплаты
+            document.querySelectorAll('.payment-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            // Выделяем выбранный
+            element.classList.add('selected');
+            // Устанавливаем radio кнопку
+            element.querySelector('input[type="radio"]').checked = true;
+            
+            // Обновляем сводку
+            const paymentName = element.querySelector('.payment-name').textContent;
+            document.getElementById('summary-payment').textContent = paymentName;
+        }
+        
+        function updateSummary() {
+            document.getElementById('summary-name').textContent = 
+                document.querySelector('input[name="customer_name"]').value || '—';
+            document.getElementById('summary-phone').textContent = 
+                document.querySelector('input[name="customer_phone"]').value || '—';
+            document.getElementById('summary-from').textContent = 
+                document.querySelector('input[name="pickup_address"]').value || '—';
+            document.getElementById('summary-to').textContent = 
+                document.querySelector('input[name="destination_address"]').value || '—';
+            
+            const selectedPayment = document.querySelector('.payment-option.selected');
+            if (selectedPayment) {
+                document.getElementById('summary-payment').textContent = 
+                    selectedPayment.querySelector('.payment-name').textContent;
+            }
+        }
+        
+        function calculatePrice() {
+            const distanceInput = document.querySelector('input[name="distance"]');
+            if (!distanceInput || !currentTariff) return;
+            
+            currentDistance = parseFloat(distanceInput.value) || 0;
+            
+            // Расчет стоимости
+            const basePrice = currentTariff.base_price || 0;
+            const kmPrice = currentTariff.price_per_km || 0;
+            const minutePrice = currentTariff.price_per_minute || 0;
+            
+            // Предполагаем 5 минут на 1 км
+            const estimatedTime = Math.round(currentDistance * 5);
+            const distanceCost = currentDistance * kmPrice;
+            const timeCost = (estimatedTime / 60) * minutePrice;
+            const totalCost = basePrice + distanceCost + timeCost;
+            
+            // Обновляем отображение
+            document.getElementById('total-price').textContent = 
+                Math.round(totalCost) + ' ₽';
+            document.getElementById('distance-info').textContent = 
+                currentDistance.toFixed(1) + ' км';
+            document.getElementById('time-info').textContent = 
+                estimatedTime + ' мин';
+        }
+        
+        // Автоматический расчет при изменении расстояния
+        document.querySelector('input[name="distance"]').addEventListener('input', calculatePrice);
+    </script>
+</body>
+</html>

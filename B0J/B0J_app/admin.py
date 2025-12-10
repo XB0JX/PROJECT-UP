@@ -1,28 +1,38 @@
 from django.contrib import admin
-from .models import Driver, Tariff
+from .models import Tariff, Driver, PaymentMethod, Order
 
 @admin.register(Tariff)
 class TariffAdmin(admin.ModelAdmin):
-    list_display = ['name', 'icon', 'base_price', 'price_per_km', 'price_per_minute', 'is_active']
-    list_filter = ['name', 'is_active']
-    list_editable = ['is_active', 'base_price', 'price_per_km']
+    list_display = ['name', 'base_price', 'price_per_km', 'price_per_minute', 'is_active']
+    list_filter = ['is_active', 'name']
+    search_fields = ['name', 'description']
+    list_editable = ['is_active']
 
 @admin.register(Driver)
 class DriverAdmin(admin.ModelAdmin):
-    list_display = ['name', 'car_model', 'car_number', 'status', 'rating', 'has_child_seat', 'has_cargo_space']
-    list_filter = ['status', 'has_child_seat', 'has_cargo_space', 'available_tariffs']
-    list_editable = ['status', 'has_child_seat', 'has_cargo_space']
+    list_display = ['name', 'car_model', 'car_number', 'phone', 'rating', 'status']
+    list_filter = ['status', 'has_child_seat', 'has_cargo_space']
+    search_fields = ['name', 'car_model', 'car_number', 'phone']
+    list_editable = ['status']
     filter_horizontal = ['available_tariffs']
-    search_fields = ['name', 'car_model', 'car_number']
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'customer_name', 'customer_phone', 'tariff', 'driver', 'total_price', 'status', 'is_paid', 'created_at']
+    list_filter = ['status', 'is_paid', 'tariff', 'payment_method']
+    search_fields = ['customer_name', 'customer_phone', 'pickup_address', 'destination_address']
+    list_editable = ['status', 'is_paid']
+    readonly_fields = ['created_at', 'updated_at']
+
+@admin.register(PaymentMethod)
+class PaymentMethodAdmin(admin.ModelAdmin):
+    list_display = ['name', 'is_active', 'commission', 'min_amount', 'max_amount', 'order']
+    list_editable = ['is_active', 'commission', 'order']
+    list_filter = ['is_active']
+    search_fields = ['name']
     
-    fieldsets = (
-        ('Основная информация', {
-            'fields': ('name', 'car_model', 'car_number', 'phone', 'rating', 'experience')
-        }),
-        ('Специальные возможности', {
-            'fields': ('has_child_seat', 'has_cargo_space', 'max_passengers')
-        }),
-        ('Тарифы и статус', {
-            'fields': ('available_tariffs', 'status')
-        }),
-    )
+    # Автоматическое заполнение иконки
+    def save_model(self, request, obj, form, change):
+        if not obj.icon:
+            obj.icon = obj.get_icon()
+        super().save_model(request, obj, form, change)
